@@ -85,4 +85,4 @@ Graphical illustration of ER-Diagram of the database see below.
 * Rework of the DB removing WorkLimits and replacing them with Semester and Programs
 * Adding Notes containing sub-notes using recursion
 
-Link to the study-git repository: 
+Link to the study-git repository: [ISupervision](https://github.com/YordanovTihomir/ISupervision)
