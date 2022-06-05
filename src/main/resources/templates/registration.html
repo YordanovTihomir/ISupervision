@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration and login</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+            crossorigin="anonymous">
+    <style>
+        h1, h2, h3, h4, h5, h6, a, p {
+            margin: 1em 0 .6em 0;
+            font-family: 'Hammersmith One', sans-serif;
+            position: relative;
+            color: #388087;
+            font-weight: 800;
+        }
+        .btn-primary {
+            border: none;
+            background-color: #BADFE7;
+            color: #388087;
+            font-weight: 700;
+            position: relative;
+            padding: 10px 20px;
+        }
+
+        .btn-primary:hover {
+            border: none;
+            background-color: #388087;
+            color: #BADFE7;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/login}">ISupervision</a>
+    </div>
+</nav>
+
+<br>
+
+
+<div class="container">
+    <div class="row">
+        <h1>User Registration Page</h1>
+        <form th:action="@{/registration}" method="post" th:object="${user}">
+
+            <div th:if="${success}" class="alert alert-primary" role="alert">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div th:if="${error}"  class="alert alert-primary" role="alert">
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="row mb-3">
+                <label for="firstName" class="col-sm-2 col-form-label">First Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="firstName" th:field="${userDto.firstName}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="lastName" class="col-sm-2 col-form-label">Last Name</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="lastName" th:field="${userDto.lastName}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="email" class="col-sm-2 col-form-label">Email</label>
+                <div class="col-sm-10">
+                    <input type="email" class="form-control" id="email" th:field="${userDto.email}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="password" class="col-sm-2 col-form-label">Password</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="password" th:field="${userDto.password}">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="confirmPassword" class="col-sm-2 col-form-label">Confirm Password</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" id="confirmPassword" th:field="${userDto.confirmPassword}">
+                </div>
+            </div>
+            <fieldset class="row mb-3">
+                <legend class="col-form-label col-sm-2 pt-0">Select Role</legend>
+                <div class="col-sm-10">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="option1" id="option1" th:field="${userDto.role}" value="ROLE_STUDENT">
+                        <label class="form-check-label" for="option1">
+                            Student
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="option2" id="option2" th:field="${userDto.role}" value="ROLE_ASSISTANT">
+                        <label class="form-check-label" for="option2">
+                            Assistant
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="option3" id="option3" th:field="${userDto.role}" value="ROLE_ADMIN">
+                        <label class="form-check-label" for="option3">
+                            Admin
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+            <button type="submit" class="btn btn-primary">Register</button>
+            <span> Already registered? <a href="/" th:href="@{/login}">Login here</a> </span>
+        </form>
+    </div>
+</div>
+</body>
+</html>

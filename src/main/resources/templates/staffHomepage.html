@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+<!--    <base href="/" />-->
+    <meta charset="UTF-8">
+    <title>Registration and login</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            id="bootstrap-css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous">
+    </script>
+<!--    <link-->
+<!--            rel="stylesheet"-->
+<!--            type="text/css"-->
+<!--            href="../static/style/main.css"-->
+<!--            id="custom-css"-->
+<!--    >-->
+    <style>
+
+        .body{
+            background: #F6F6F2;
+        }
+
+        h1, h2, h3, h4, h5, h6, a, p {
+            margin: 1em 0 .6em 0;
+            font-family: 'Hammersmith One', sans-serif;
+            position: relative;
+            color: #388087;
+            font-weight: 800;
+        }
+
+        .modal-header {
+            background-color: #BADFE7;
+        }
+
+        .card-header {
+            background-color: #C2EDCE;
+        }
+
+        .btn-primary {
+            border: none;
+            background-color: #BADFE7;
+            color: #388087;
+            font-weight: 700;
+            position: relative;
+            padding: 10px 20px;
+        }
+
+        .btn-primary:hover {
+            border: none;
+            background-color: #388087;
+            color: #BADFE7;
+        }
+
+        .card {
+            height: 18rem
+        }
+    </style>
+
+
+</head>
+<body class="body">
+    <nav class="navbar navbar-light bg-light" >
+        <div class="container-fluid" >
+            <a class="navbar-brand" th:href="@{/staffHomepage}">ISupervision</a>
+            <ul class="nav navbar-nav">
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a> </li>
+            </ul>
+        </div>
+    </nav>
+
+    <br>
+
+    <div class="main" style="padding-left: 5%; padding-right: 5%; padding-bottom: 10%;">
+
+        <h1>StaffHomepage</h1>
+
+
+        <div th:if="${success}" class="alert alert-primary" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div th:if="${error}"  class="alert alert-primary" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+
+        <h4> Hello <span th:text ="${#authentication.getPrincipal().getFirstName()}"></span> </h4>
+
+        <div>
+            <h3>Limit of projects <span th:text="${projectLimit}"></span>.</h3>
+            <div th:if="${projects.size()} < ${projectLimit}">
+                <div class="new-work">
+                    <a th:href="@{/staffHomepage/newWork}" class="btn btn-primary btn-sm mb-3">ADD NEW</a>
+                </div>
+            </div>
+        </div>
+        <div th:if="${projects.empty}">
+            <p><span> No Projects found </span></p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <th:block th:each="project : ${projects}">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title" th:text="${project.title}"></h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" th:text="${project.description}"></p>
+                        <div th:switch="${project.taken}">
+                            <p th:case="${true}">Status: Taken</p>
+                            <p th:case="*">Status: Free</p>
+                        </div>
+                        <div style="position: absolute; bottom: 7%;">
+                            <a th:if="${project.approved}"
+                                    sec:authorize="hasRole('ROLE_ADMIN')"
+                                    type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-row="${project}"
+                                    th:attr="data-bs-target='#modal-warning'+${project.id }">
+                                Delete
+                            </a>
+
+                            <a th:if="${!project.approved}"
+                                    type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    data-row="${project}"
+                                    th:attr="data-bs-target='#modal-warning'+${project.id }">
+                                Delete
+                            </a>
+
+                            <a th:if="${project.approved}"
+                               sec:authorize="hasRole('ROLE_ADMIN')"
+                               th:href="@{/staffHomepage/edit/{id}(id=${project.id})}"
+                               class="btn btn-primary">Edit</a>
+
+                            <a th:if="${!project.approved}"
+                               th:href="@{/staffHomepage/edit/{id}(id=${project.id})}"
+                               class="btn btn-primary">Edit</a>
+
+                            <a type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#modal-info'+${project.id }"
+                                    data-row="${project}">
+                                Details
+                            </a>
+
+                            <a th:if="${!project.approved}" sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/staffHomepage/approve/{id}(id=${project.id})}"
+                               class="btn btn-primary">Approve
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div th:fragment="modal" class="modal fade" th:id="modal-warning+${project.id }" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Info</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <p>Are you sure you want to delete this?</p>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a th:href="@{/staffHomepage/delete/{id}(id=${project.id})}" class="btn btn-primary">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:fragment="modal" th:id="modal-info+${project.id }" class="modal fade" tabindex="-1"
+                     aria-labelledby="projectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Info</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Project ID: <span th:text="${project.id}">Id</span><br>
+                                Title: <span th:text="${project.title}">Title</span><br>
+                                Description: <span th:text="${project.description}"></span><br>
+                                Deadline: <span th:text="${#dates.format(project.deadline, 'dd-MM-yyyy')}">Deadline</span><br>
+                                Term date: <span th:text="${#dates.format(project.termDate, 'dd-MM-yyyy')}">Term date</span><br>
+                                Approved: <span th:text="${project.approved}"></span><br>
+                                Taken: <span th:text="${project.taken}">Student</span><br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <a th:href="@{/staffHomepage/edit/{id}(id=${project.id})}"
+                                   class="btn btn-primary">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </th:block>
+        </div>
+
+        <br>
+        <br>
+        <div>
+            <h3>Limit of bachelors <span th:text="${bachelorLimit}"></span>.</h3>
+            <div th:if="${bachelors.size()} < ${bachelorLimit}">
+                <div class="new-work">
+                    <a th:href="@{/staffHomepage/newWork}" class="btn btn-primary btn-sm mb-3">ADD NEW</a>
+                </div>
+            </div>
+        </div>
+        <div th:if="${bachelors.empty}">
+            <p><span> No Bachelors found </span></p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <th:block th:each="bachelor : ${bachelors}">
+                <div class="col">
+                    <div class="card" style="height: 18rem;">
+                        <div class="card-header">
+                            <h5 class="card-title" th:text="${bachelor.title}"></h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text" th:text="${bachelor.description}"></p>
+                            <div th:switch="${bachelor.taken}">
+                                <p th:case="${true}">Status: Taken</p>
+                                <p th:case="*">Status: Free</p>
+                            </div>
+                            <div style="position: absolute; bottom: 7%;">
+                                <a th:if="${bachelor.approved}"
+                                        sec:authorize="hasRole('ROLE_ADMIN')"
+                                        type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-row="${bachelor}"
+                                        th:attr="data-bs-target='#modal-warning'+${bachelor.id }">
+                                    Delete
+                                </a>
+
+                                <a th:if="${!bachelor.approved}"
+                                        type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-row="${bachelor}"
+                                        th:attr="data-bs-target='#modal-warning'+${bachelor.id }">
+                                    Delete
+                                </a>
+
+                                <a th:if="${bachelor.approved}"
+                                   sec:authorize="hasRole('ROLE_ADMIN')"
+                                   th:href="@{/staffHomepage/edit/{id}(id=${bachelor.id})}"
+                                   class="btn btn-primary">Edit</a>
+
+                                <a th:if="${!bachelor.approved}"
+                                   th:href="@{/staffHomepage/edit/{id}(id=${bachelor.id})}"
+                                   class="btn btn-primary">Edit</a>
+
+                                <a type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        th:attr="data-bs-target='#modal-info'+${bachelor.id }"
+                                        data-row="${project}">
+                                    Details
+                                </a>
+
+                                <a th:if="${!bachelor.approved}" sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/staffHomepage/approve/{id}(id=${bachelor.id})}"
+                                   class="btn btn-primary">Approve
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div th:fragment="modal" class="modal fade" th:id="modal-warning+${bachelor.id }" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Info</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <p>Are you sure you want to delete this?</p>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <a th:href="@{/staffHomepage/delete/{id}(id=${bachelor.id})}" class="btn btn-primary">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:fragment="modal" th:id="modal-info+${bachelor.id }" class="modal fade" tabindex="-1"
+                         aria-labelledby="projectModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Info</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Project ID: <span th:text="${bachelor.id}">Id</span><br>
+                                    Title: <span th:text="${bachelor.title}">Title</span><br>
+                                    Description: <span th:text="${bachelor.description}"></span><br>
+                                    Deadline: <span th:text="${#dates.format(bachelor.deadline, 'dd-MM-yyyy')}">Deadline</span><br>
+                                    Term date: <span th:text="${#dates.format(bachelor.termDate, 'dd-MM-yyyy')}">Term date</span><br>
+                                    Approved: <span th:text="${bachelor.approved}"></span><br>
+                                    Taken: <span th:text="${bachelor.taken}">Student</span><br>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <a th:href="@{/staffHomepage/edit/{id}(id=${bachelor.id})}"
+                                       class="btn btn-primary">Edit</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </th:block>
+        </div>
+        <br>
+        <br>
+        <div>
+            <h3>Limit of projects <span th:text="${masterLimit}"></span>.</h3>
+            <div th:if="${masters.size()} < ${masterLimit}">
+                <div class="new-work">
+                    <a th:href="@{/staffHomepage/newWork}" class="btn btn-primary btn-sm mb-3">ADD NEW</a>
+                </div>
+            </div>
+        </div>
+        <div th:if="${masters.empty}">
+            <p><span> No masters found </span></p>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <th:block th:each="master : ${masters}">
+                <div class="col">
+                    <div class="card" style="height: 18rem;">
+                        <div class="card-header">
+                            <h5 class="card-title" th:text="${master.title}"></h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text" th:text="${master.description}"></p>
+                            <div th:switch="${master.taken}">
+                                <p th:case="${true}">Status: Taken</p>
+                                <p th:case="*">Status: Free</p>
+                            </div>
+                            <div style="position: absolute; bottom: 7%;">
+                                <a th:if="${master.approved}"
+                                        sec:authorize="hasRole('ROLE_ADMIN')"
+                                        type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-row="${master}"
+                                        th:attr="data-bs-target='#modal-warning'+${master.id }">
+                                    Delete
+                                </a>
+
+                                <a th:if="${!master.approved}"
+                                        type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-row="${master}"
+                                        th:attr="data-bs-target='#modal-warning'+${master.id }">
+                                    Delete
+                                </a>
+
+                                <a th:if="${master.approved}"
+                                   sec:authorize="hasRole('ROLE_ADMIN')"
+                                   th:href="@{/staffHomepage/edit/{id}(id=${master.id})}"
+                                   class="btn btn-primary">Edit</a>
+
+                                <a th:if="${!master.approved}"
+                                   th:href="@{/staffHomepage/edit/{id}(id=${master.id})}"
+                                   class="btn btn-primary">Edit</a>
+
+                                <a type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        th:attr="data-bs-target='#modal-info'+${master.id }"
+                                        data-row="${project}">
+                                    Details
+                                </a>
+
+                                <a th:if="${!master.approved}" sec:authorize="hasRole('ROLE_ADMIN')" th:href="@{/staffHomepage/approve/{id}(id=${master.id})}"
+                                   class="btn btn-primary">Approve
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div th:fragment="modal" class="modal fade" th:id="modal-warning+${master.id }" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="ModalLabel">Info</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <p>Are you sure you want to delete this?</p>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <a th:href="@{/staffHomepage/delete/{id}(id=${master.id})}" class="btn btn-primary" id="del">Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div th:fragment="modal" th:id="modal-info+${master.id }" class="modal fade" id="projectModal" tabindex="-1"
+                         aria-labelledby="projectModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewModalLabel">Info</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Project ID: <span th:text="${master.id}">Id</span><br>
+                                    Title: <span th:text="${master.title}">Title</span><br>
+                                    Description: <span th:text="${master.description}"></span><br>
+                                    Deadline: <span th:text="${#dates.format(master.deadline, 'dd-MM-yyyy')}">Deadline</span><br>
+                                    Term date: <span th:text="${#dates.format(master.termDate, 'dd-MM-yyyy')}">Term date</span><br>
+                                    Approved: <span th:text="${master.approved}"></span><br>
+                                    Taken: <span th:text="${master.taken}">Student</span><br>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <a th:href="@{/staffHomepage/edit/{id}(id=${master.id})}"
+                                       class="btn btn-primary">Edit</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </th:block>
+        </div>
+        <br>
+        <form th:action="@{staffHomepage/setLimits}" method="post" th:object="${workLimits}">
+            <label>
+                <select name="color" th:field="*{workType}">
+                    <option th:each="workType : ${T(com.example.isupervision.entities.works.WorkType).values()}"
+                            th:value="${workType}" th:text="${workType}"></option>
+                </select>
+            </label>
+            <div class="col-md-1">
+                <label for="limit" class="form-label">Limit of Works</label>
+                <input type="number" class="form-control" id="limit" th:field="*{limit}">
+            </div>
+            <br>
+            <div class="col-sm-2 col-sm-offset-2">
+                <input type="submit" name="set-submit" id="set-submit"
+                       class="form-control btn btn-primary" value="Set"/>
+            </div>
+        </form>
+    </div>
+    </body>
+</html>

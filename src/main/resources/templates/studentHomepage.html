@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration and login</title>
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            id="bootstrap-css">
+    <link
+            rel="stylesheet"
+            type="text/css"
+            href="../static/style/main.css"
+            id="custom-css"
+    >
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous">
+    </script>
+    <style>
+
+        .body{
+            background: #F6F6F2;
+        }
+
+        h1, h2, h3, h4, h5, h6, a, p {
+            margin: 1em 0 .6em 0;
+            font-family: 'Hammersmith One', sans-serif;
+            position: relative;
+            color: #388087;
+            font-weight: 800;
+        }
+
+        .modal-header {
+            background-color: #BADFE7;
+        }
+
+        .card-header {
+            background-color: #C2EDCE;
+        }
+
+        .btn-primary {
+            border: none;
+            background-color: #BADFE7;
+            color: #388087;
+            font-weight: 700;
+            position: relative;
+            padding: 10px 20px;
+        }
+
+        .btn-primary:hover {
+            border: none;
+            background-color: #388087;
+            color: #BADFE7;
+        }
+
+        .card {
+            height: 18rem
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light" >
+        <div class="container-fluid" >
+            <a class="navbar-brand" th:href="@{/studentHomepage}">ISupervision</a>
+            <ul class="nav navbar-nav">
+                <li sec:authorize="isAuthenticated()"><a th:href="@{/logout}">Logout</a> </li>
+            </ul>
+        </div>
+    </nav>
+<br>
+
+
+<div class="main" style="padding-left: 5%; padding-right: 5%; padding-bottom: 10%;">
+    <div th:if="${success}" class="alert alert-primary" role="alert">
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${error}"  class="alert alert-primary" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <h1>StudentHomepage</h1>
+    <h4> Hello <span th:text ="${#authentication.getPrincipal().getFirstName()}"></span> </h4>
+    <h2>Your Works</h2>
+
+    <div th:if="${userWorks.isEmpty()}">
+        <p><span> You have no finished works </span></p>
+    </div>
+
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <th:block th:each="work : ${userWorks}">
+            <div class="col">
+                <div class="card" style="height: 18rem;">
+                    <div class="card-header">
+                        <span th:text="${work.type.name()}"></span>
+                        <h5 class="card-title" th:text="${work.title}"></h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" th:text="${work.description}"></p>
+
+                        <div style="position: absolute; bottom: 7%;">
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#modal-info'+${work.id }"
+                                    data-row="${work}">
+                                Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:fragment="modal" th:id="modal-info+${work.id }" class="modal fade" tabindex="-1"
+                     aria-labelledby="projectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Info</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Project ID: <span th:text="${work.id}">Id</span><br>
+                                Title: <span th:text="${work.title}">Title</span><br>
+                                Description: <span th:text="${work.description}"></span><br>
+                                Deadline: <span th:text="${#dates.format(work.deadline, 'dd-MM-yyyy')}">Deadline</span><br>
+                                Term date: <span th:text="${#dates.format(work.termDate, 'dd-MM-yyyy')}">Term date</span><br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </div>
+    <br>
+    <h2>Related works for you</h2>
+
+    <div th:if="${relatedWorks == null}">
+        <p><span> There are no works for you </span></p>
+    </div>
+
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <th:block th:each="work : ${relatedWorks}">
+            <div class="col">
+                <div class="card" style="height: 18rem;">
+                    <div class="card-header">
+                        <span th:text="${work.type.name()}"></span>
+                        <h5 class="card-title" th:text="${work.title}"></h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text" th:text="${work.description}"></p>
+
+                        <div style="position: absolute; bottom: 7%;">
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    data-bs-toggle="modal"
+                                    th:attr="data-bs-target='#modal-info'+${work.id }"
+                                    data-row="${work}">
+                                Details
+                            </button>
+                            <a th:href="@{/studentHomepage/take/{id}(id=${work.id})}" class="btn btn-primary">Take</a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div th:fragment="modal" th:id="modal-info+${work.id }" class="modal fade" tabindex="-1"
+                     aria-labelledby="projectModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Info</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                Project ID: <span th:text="${work.id}">Id</span><br>
+                                Title: <span th:text="${work.title}">Title</span><br>
+                                Description: <span th:text="${work.description}"></span><br>
+                                Deadline: <span th:text="${#dates.format(work.deadline, 'dd-MM-yyyy')}">Deadline</span><br>
+                                Term date: <span th:text="${#dates.format(work.termDate, 'dd-MM-yyyy')}">Term date</span><br>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </th:block>
+    </div>
+
+
+<!--    <table class="table">-->
+<!--        -->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--        <tr th:if="${relatedWorks.isEmpty()}">-->
+<!--            <td colspan="2"> You finished everything </td>-->
+<!--        </tr>-->
+<!--        <tr th:each="work : ${relatedWorks}">-->
+<!--            <td><span th:text="${work.title}"> Title </span></td>-->
+<!--            <td><span th:text="${#dates.format(work.termDate, 'dd-MM-yyyy')}"> Term Date </span></td>-->
+<!--            <td>-->
+<!--                <div th:switch="${work.taken}">-->
+<!--                    <p th:case="${true}">Taken</p>-->
+<!--                    <p th:case="*">Free</p>-->
+<!--                </div>-->
+<!--            </td>-->
+<!--            <td>-->
+<!--                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#relatedModal">-->
+<!--                    Details-->
+<!--                </button>-->
+
+<!--                <a th:href="@{/studentHomepage/take/{id}(id=${work.id})}"-->
+<!--                   class="btn btn-primary">Take</a>-->
+<!--            </td>-->
+<!--            <div class="modal fade" id="relatedModal" tabindex="-1" aria-labelledby="relatedModalLabel" aria-hidden="true">-->
+<!--                <div class="modal-dialog">-->
+<!--                    <div class="modal-content">-->
+<!--                        <div class="modal-header">-->
+<!--                            <h5 class="modal-title" id="viewRelatedModalLabel">Info</h5>-->
+<!--                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">-->
+<!--                                <span aria-hidden="true">&times;</span>-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                        <div class="modal-body">-->
+<!--                            Project ID: <span th:text="${work.id}">Id</span><br>-->
+<!--                            Title: <span th:text="${work.title}">Title</span><br>-->
+<!--                            Description: <span th:text="${work.description}"></span><br>-->
+<!--                            Deadline: <span th:text="${#dates.format(work.deadline, 'dd-MM-yyyy')}">Deadline</span><br>-->
+<!--                            Term date: <span th:text="${#dates.format(work.termDate, 'dd-MM-yyyy')}">Term date</span><br>-->
+<!--                        </div>-->
+<!--                        <div class="modal-footer">-->
+<!--                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>-->
+<!--                            <a th:href="@{/studentHomepage/take/{id}(id=${work.id})}"-->
+<!--                               class="btn btn-primary">Take</a>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </tr>-->
+<!--        </tbody>-->
+<!--    </table>-->
+</div>
+</body>
+</html>

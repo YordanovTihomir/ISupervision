@@ -1,0 +1,19 @@
+SET GLOBAL FOREIGN_KEY_CHECKS=0;
+insert into student (email, first_name, last_name, password) values ('student-test@gmail.com', 'Student', 'Test', '1234');
+insert into user_roles (user_email, role_id) values ('student-test@gmail.com', '1');
+insert into staff (email, first_name, last_name, password) values ('assistant-test@gmail.com', 'Assistant', 'Test', '1234');
+insert into user_roles (user_email, role_id) values ('assistant-test@gmail.com', '2');
+insert into staff (email, first_name, last_name, password) values ('admin-test@gmail.com', 'Admin', 'Test', '1234');
+insert into user_roles (user_email, role_id) values ('admin-test@gmail.com', '3');
+SET GLOBAL FOREIGN_KEY_CHECKS=1;
+
+
+INSERT INTO work
+    (title, description, deadline, term_date, type, taken, approved, student_email)
+VALUES
+    ('Zaam-Dox', 'Nichols', str_to_date('9-2-2021', '%d-%m-%Y'), str_to_date('9-3-2021', '%d-%m-%Y'), 1, true, false, null),
+    ('Lotlux', 'Devan', str_to_date('17-5-2021', '%d-%m-%Y'), str_to_date('27-2-2021', '%d-%m-%Y'), 2, false, true, null),
+    ('Sonsing', 'Puff', str_to_date('3-5-2021', '%d-%m-%Y'), str_to_date('11-11-2021', '%d-%m-%Y'), 0, false, true, null),
+    ('Duobam', 'Newton', str_to_date('24-2-2021', '%d-%m-%Y'), str_to_date('3-12-2021', '%d-%m-%Y'), 1, false, false, null),
+    ('Cardguard', 'Cyndi', str_to_date('10-3-2021', '%d-%m-%Y'), str_to_date('28-5-2021', '%d-%m-%Y'), 2, false, true, null),
+    ('Zoolab', 'Rafaelia', str_to_date('11-12-2021', '%d-%m-%Y'), str_to_date('9-9-2021', '%d-%m-%Y'), 0, false, true, null);
